@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
-import Task from "../models/TaskModel";
+// import Task from "../models/TaskModel";
 import { taskService } from "../service/task-service";
 
 const { create, view } = taskService();
 
-export const taskCreate = async (req: Request, res: Response) => {
-  const { title, description, assignedTo, createdBy } = req.body;
-
+export const taskCreate = async (req: any, res: any) => {
+  const { title, description, assignedTo } = req.body;
+  const createdBy = req.userData.id;
+  const data = {title, description, assignedTo, createdBy}
   try {
     // await Task.create({
     //     title: title,
@@ -15,7 +16,7 @@ export const taskCreate = async (req: Request, res: Response) => {
     //     createdBy: createdBy,
     // });
 
-    const resp = await create(req?.body);
+    const resp = await create(data);
     res.json({
       message: "Task Created Successful",
       data: resp,
@@ -31,8 +32,9 @@ export const taskCreate = async (req: Request, res: Response) => {
 export const viewTasks = async (req: any, res: Response) => {
   try {
     // const tasks = await Task.find({ assignedTo: req.user.id });
-    const id = req.user.id
-    const resp = await view(id)
+    const userId = req.user.id
+    // console.log(id)
+    const resp = await view(userId)
     res.json({
       message: "Task fetched successfully",
       data: resp,

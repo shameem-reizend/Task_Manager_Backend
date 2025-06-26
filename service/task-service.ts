@@ -1,4 +1,4 @@
-import Task from "../models/TaskModel";
+import {Task} from "../models/TaskModel";
 
 export const taskService = () => {
   const create = async (data: any) => {
@@ -9,14 +9,18 @@ export const taskService = () => {
         assignedTo: data?.assignedTo,
         createdBy: data?.createdBy,
       });
+      resp.save();
       return resp;
     } catch (error: any) {
       return error;
     }
   };
-  const view = async(id: String) => {
+  const view = async(userId: any) => {
     try{
-      const resp = await Task.find({ assignedTo: id });
+      const resp = await Task.find({ where: {
+        assignedTo: {id: userId}
+      },relations:["assignedTo","createdBy"] });
+      
       return resp;
     } catch(error: any) {
       return error;

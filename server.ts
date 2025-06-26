@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import express , { Request, Response } from 'express';
 import connectDB from './config/database';
 import userRouter from './routes/UserRouter'
