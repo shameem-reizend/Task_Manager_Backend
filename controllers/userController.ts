@@ -6,8 +6,11 @@ import dotenv from 'dotenv';
 import { error } from 'console';
 import upload from '../config/cloudinaryConfig';
 import cookieParser from 'cookie-parser';
+import { userService } from '../service/userServices';
 
 dotenv.config();
+
+const { create, finduser, getAllProfilePics } = userService();
 
 function getEnvVariable(key: string): string {
   const value = process.env[key];
@@ -22,13 +25,16 @@ export const UserRegister = async (req: any, res: any) => {
     const { username, password, role } = req.body;
     console.log(username, password, role)
     const hashedPassword = await bcrypt.hash(password, 10);
+    const profile_url = req.file.path;
     try {
-        await User.create({
-        username: username,
-        password: hashedPassword,
-        role: role,
-        profile_url: req.file.path
-        });
+        // await User.create({
+        // username: username,
+        // password: hashedPassword,
+        // role: role,
+        // profile_url: req.file.path
+        // });
+        const data = {username, hashedPassword, role, profile_url}
+        await create(data);
 
         res.json({
         message: "Registration Successful",
@@ -47,9 +53,11 @@ function generateAccessToken(user: any){
 
 export const userLogin = async (req: Request, res: Response) => {
     const {username, password} = req.body;
-    const userFound = await User.findOne({
-        username: username,
-    });
+    // const userFound = await User.findOne({
+    //     username: username,
+    // });
+
+    const userFound = await finduser(username)
     if(userFound && (await bcrypt.compare(password, userFound.password.toString()))){
         const user = {
             username: username,
@@ -108,7 +116,8 @@ export const userLogout = (req: Request, res: Response) => {
 
 export const profileImages =  async(req: any, res: any) => {
     try{
-    const profilePics = await User.find({}, 'profile_url').lean();
+    // const profilePics = await User.find({}, 'profile_url').lean();
+        const profilePics = await getAllProfilePics();
 
         res.json({
             profilePics,
