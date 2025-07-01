@@ -30,7 +30,7 @@ export const userService = () => {
   const getAllProfilePics = async () => {
     try {
         const resp = await User.find({
-            select: ['id', 'profile_url'],
+            select: ['id', 'username', 'profile_url'],
         });
 
       return resp;

@@ -8,5 +8,5 @@ userRouter.post('/register',upload.single('file'), UserRegister);
 userRouter.post('/login', userLogin);
 userRouter.get('/logout', userLogout);
 userRouter.get('/refresh-token', refreshUserToken);
-userRouter.get('/profile-pics', profileImages)
+userRouter.get('/user_details', profileImages)
 export default userRouter;

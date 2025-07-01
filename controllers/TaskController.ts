@@ -18,7 +18,7 @@ export const taskCreate = async (req: any, res: any) => {
 
     const resp = await create(data);
     res.json({
-      message: "Task Created Successful",
+      message: "Task Created Successfully",
       data: resp,
     });
   } catch (error) {

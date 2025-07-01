@@ -117,10 +117,10 @@ export const userLogout = (req: Request, res: Response) => {
 export const profileImages =  async(req: any, res: any) => {
     try{
     // const profilePics = await User.find({}, 'profile_url').lean();
-        const profilePics = await getAllProfilePics();
+        const userDetails = await getAllProfilePics();
 
         res.json({
-            profilePics,
+            userDetails,
         })
     } catch(erro){
         res.json({
