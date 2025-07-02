@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, Check } from 'typeorm';
 import { Task } from "./TaskModel";
 
 export enum roles {
@@ -7,6 +7,7 @@ export enum roles {
     admin = 'admin'
 }
 
+@Check(`"email" ~* '^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$'`)
 @Entity('user')
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
@@ -17,6 +18,10 @@ export class User extends BaseEntity {
 
   @Column()
   password!: string;
+
+  @Column({ unique: true
+  })
+  email!: string;
 
   @Column({
     type: 'enum',
@@ -30,6 +35,12 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Task, (task: { assignedTo: any; }) => task.assignedTo)
   tasks!: Task[];
+
+  @Column({ type: 'text', nullable: true })
+  reset_token?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  reset_token_expires?: Date;
 }
 
 

@@ -7,10 +7,11 @@ import { error } from 'console';
 import upload from '../config/cloudinaryConfig';
 import cookieParser from 'cookie-parser';
 import { userService } from '../service/userServices';
+import { sendResetEmail } from '../service/EmailServices';
 
 dotenv.config();
 
-const { create, finduser, getAllProfilePics } = userService();
+const { create, finduser, getAllProfilePics, saveResetToken, saveNewPassword, findResetuser, finduserByEmail } = userService();
 
 function getEnvVariable(key: string): string {
   const value = process.env[key];
@@ -128,3 +129,51 @@ export const profileImages =  async(req: any, res: any) => {
         })
     }
 };
+
+export const forgetPassword = async (req: any, res: any) => {
+    const { email } = req.body;
+    const user = await finduserByEmail(email);
+    console.log(user, email)
+    if(!user){
+        return res.json({
+            message: "User not found"
+        });
+    } else {
+        const resetToken = jwt.sign({ id: user.id }, access_scret_key, { expiresIn: '15m' });
+        sendResetEmail(user.email, resetToken);
+        const data = {
+            reset_token: resetToken,
+            reset_token_expires: new Date(Date.now() + 15 * 60 * 1000)
+        };
+        await saveResetToken(user.id, data);
+        res.json({
+            message: "Reset token generated",
+            resetToken: resetToken
+        });
+    }
+}
+
+export const resetPassword = async (req: any, res: any) => {
+    const { password } = req.body;
+    const token = req.params.token;
+    try {
+        const decoded: any = jwt.verify(token, access_scret_key);
+        const user = await findResetuser(decoded.id);
+        if (!user || user.reset_token !== token || user.reset_token_expires < new Date()) {
+            console.log(user);
+            return res.json({
+                message: "Invalid or expired reset token"
+            });
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        saveNewPassword(hashedPassword, decoded.id);
+        res.json({
+            message: "Password reset successful"
+        });
+    } catch (error) {
+        res.json({
+            message: "Error resetting password",
+            error
+        });
+    }
+}
